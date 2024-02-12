@@ -1,6 +1,6 @@
 import { MongoClient, ObjectId } from "mongodb";
 
-async function handler(req, res) {
+async function handler3(req, res) {
   if (req.method === 'PUT') {
     const { taskId } = req.query;
     
@@ -29,4 +29,4 @@ async function handler(req, res) {
   }
 }
 
-export default handler;
+export default handler3;

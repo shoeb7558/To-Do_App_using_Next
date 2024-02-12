@@ -2,7 +2,7 @@
 import { MongoClient } from "mongodb";
 
 // Define your API handler function
-async function handler(req, res) {
+async function handler2(req, res) {
     if (req.method === 'GET') {
         try {
             // Connect to MongoDB
@@ -26,6 +26,6 @@ async function handler(req, res) {
     }
 }
 
-export default handler;
+export default handler2;
 
 
