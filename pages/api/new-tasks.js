@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 
-async function handler(req, res) {
+async function handler4(req, res) {
   console.log(req.body)
   if (req.method === 'POST') {
     const data = req.body;
@@ -26,4 +26,4 @@ async function handler(req, res) {
   }
 }
 
-export default handler;
+export default handler4;

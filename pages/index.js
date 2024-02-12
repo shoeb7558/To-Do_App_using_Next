@@ -88,10 +88,29 @@ const IndexPage = () => {
 
 
 
-  const deleteTask = (taskIndex) => {
-    const remainingTasks = tasks.filter((_, index) => index !== taskIndex);
-    setTasks(remainingTasks);
-  };
+  const deleteTask = async (taskId) => {
+    
+    try {
+        const response = await fetch('api/delete-task', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ taskId }), // Send the taskId in the request body
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to delete task');
+        }
+
+        // Filter out the deleted task from the tasks state
+        const updatedTasks = tasks.filter(task => task._id !== taskId);
+        setTasks(updatedTasks);
+    } catch (error) {
+        console.error('Error deleting task:', error);
+    }
+};
+
 
 
 
@@ -133,12 +152,12 @@ const IndexPage = () => {
 
   const updateTask = async (id, updatedText) => {
     try {
-      const response = await fetch(`api/update/${id}`, {
+      const response = await fetch('api/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: updatedText }),
+        body: JSON.stringify({id:id, text: updatedText }),
       });
 
       if (!response.ok) {
@@ -183,7 +202,7 @@ const IndexPage = () => {
                     onChange={handleEditChange}
                   />
                   <button
-                    onClick={() => updateTask(editTask.id, editTask.text)}
+                    onClick={() => updateTask(tasks._id, editTask.text)}
                   >
                     Save
                   </button>

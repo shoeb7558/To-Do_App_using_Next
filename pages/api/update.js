@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 
-async function handler(req, res) {
+async function handler5(req, res) {
     if (req.method === 'PUT') {
         const { taskId } = req.query;
         const { text } = req.body; // Extract the new text from the request body
@@ -29,4 +29,4 @@ async function handler(req, res) {
     }
 }
 
-export default handler;
+export default handler5;
