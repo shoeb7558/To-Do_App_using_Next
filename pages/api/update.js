@@ -3,7 +3,7 @@ import { MongoClient } from "mongodb";
 async function handler(req, res) {
     if (req.method === 'PUT') {
         const { taskId } = req.query;
-        
+        const { text } = req.body; // Extract the new text from the request body
 
         try {
             const client = await MongoClient.connect('mongodb+srv://shoebshaikh:bepositive@cluster1.zxfllfq.mongodb.net/tasks?retryWrites=true&w=majority');
@@ -12,13 +12,13 @@ async function handler(req, res) {
 
             const result = await tasksCollection.updateOne(
                 { _id: taskId },
-                { $set: { completed: true } } // Set completed to true for the specified task
+                { $set: { task: text } } // Update the task field with the new text
             );
 
             client.close();
 
             if (result.modifiedCount === 1) {
-                res.status(200).json({ message: 'Task completed successfully' });
+                res.status(200).json({ message: 'Task updated successfully' });
             } else {
                 res.status(404).json({ message: 'Task not found' });
             }
