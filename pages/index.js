@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-
 import './Home.css'
 import CompletedTasks from './completed-tasks';// Import the CompletedTasks component
+
 
 const IndexPage = () => {
   
@@ -15,6 +15,7 @@ const IndexPage = () => {
     if (taskInput.trim() !== '') {
       // Create a new task object
       const newTask = {
+        completed: false,
         task: taskInput
       };
   
@@ -50,31 +51,44 @@ const IndexPage = () => {
 
 
 
-  const completeTask = async (taskIndex) => {
-    const taskCompleted = tasks[taskIndex];
-    const remainingTasks = tasks.filter((_, index) => index !== taskIndex);
-  
-    // Call server-side endpoint to save completed task
+  const completeTask = async (taskId) => {
+    
+    console.log(taskId);
+    
     try {
-      const response = await fetch('/api/new-completedtask', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(taskCompleted)
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to complete task');
-      }
-  
-      // Update local state after successfully completing the task
-      setTasks(remainingTasks);
-      setCompletedTasks([...completedTasks, taskCompleted]);
+        const response = await fetch(`api/new-completedtask/${taskId}`, { // Use the correct endpoint URL
+            method: 'PUT', // Use PATCH method to update the task
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ completed: false }) // Send completed status as true
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to complete task');
+        }
+
+        // Update the task completion status locally
+        const updatedTasks = tasks.map((task) => {
+            if (task._id === taskId) {
+                return { ...task, completed: true }; // Update the completed status
+            }
+            return task;
+        });
+
+        setTasks(updatedTasks); // Update the tasks state
+
+        // Update the completed tasks state
+        const completedTask = tasks.find((task) => task._id === taskId);
+        setCompletedTasks([...completedTasks, completedTask]);
+        
+        // Update the comple state to trigger re-rendering
+        setComple(true);
     } catch (error) {
-      console.error('Error completing task:', error);
+        console.error('Error completing task:', error);
     }
-  };
+};
+
   
 
 
@@ -131,8 +145,8 @@ const IndexPage = () => {
         {tasks.map((task, index) => (
           <li key={index}>
             {task.task}
-            <button className='inputfield' onClick={() => completeTask(index)}>Complete</button>
-            <button className='inputfield' onClick={() => deleteTask(index)}>Delete</button>
+            <button className='inputfield' onClick={() => completeTask(task._id)}>Complete</button>
+            <button className='inputfield' onClick={() => deleteTask(task._id)}>Delete</button>
           </li>
         ))}
       </ul>
