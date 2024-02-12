@@ -3,12 +3,15 @@ import './Home.css'
 import CompletedTasks from './completed-tasks';// Import the CompletedTasks component
 
 
+
+
 const IndexPage = () => {
   
   const [tasks, setTasks] = useState([]);
   const [taskInput, setTaskInput] = useState('');
   const [completedTasks, setCompletedTasks] = useState([]); 
   const [comple, setComple] = useState(false); // State for completed tasks
+  const [editTask, setEditTask] = useState({ id: null, text: '' });
 
   const addTask = async () => {
     console.log('called')
@@ -52,42 +55,34 @@ const IndexPage = () => {
 
 
   const completeTask = async (taskId) => {
-    
-    console.log(taskId);
-    
+    console.log(taskId)
     try {
-        const response = await fetch(`api/new-completedtask/${taskId}`, { // Use the correct endpoint URL
-            method: 'PUT', // Use PATCH method to update the task
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ completed: false }) // Send completed status as true
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to complete task');
+      const response = await fetch('api/completedtask', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(taskId) // Send completed status as true
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to complete task');
+      }
+  
+      // Update the task completion status locally
+      const updatedTasks = tasks.map((task) => {
+        if (task._id === taskId) {
+          return { ...task, completed: true }; // Update the completed status
         }
-
-        // Update the task completion status locally
-        const updatedTasks = tasks.map((task) => {
-            if (task._id === taskId) {
-                return { ...task, completed: true }; // Update the completed status
-            }
-            return task;
-        });
-
-        setTasks(updatedTasks); // Update the tasks state
-
-        // Update the completed tasks state
-        const completedTask = tasks.find((task) => task._id === taskId);
-        setCompletedTasks([...completedTasks, completedTask]);
-        
-        // Update the comple state to trigger re-rendering
-        setComple(true);
+        return task;
+      });
+  
+      setTasks(updatedTasks); // Update the tasks state
     } catch (error) {
-        console.error('Error completing task:', error);
+      console.error('Error completing task:', error);
     }
-};
+  };
+  
 
   
 
@@ -127,6 +122,42 @@ const IndexPage = () => {
   }, []);
 
 
+
+  const editTaskHandler = (id, text) => {
+    setEditTask({ id, text }); // Set the task to be edited
+  };
+
+  const handleEditChange = (e) => {
+    setEditTask({ ...editTask, text: e.target.value }); // Update the edited task content
+  };
+
+  const updateTask = async (id, updatedText) => {
+    try {
+      const response = await fetch(`api/update/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: updatedText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update task');
+      }
+
+      // Update the task locally
+      const updatedTasks = tasks.map((task) =>
+        task._id === id ? { ...task, task: updatedText } : task
+      );
+      setTasks(updatedTasks);
+
+      // Reset the edit state
+      setEditTask({ id: null, text: '' });
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
+  };
+
   return (
     <>
     <div className='maindiv'>
@@ -142,14 +173,47 @@ const IndexPage = () => {
         {comple ? 'Hide Completed Tasks' : 'Show Completed Tasks'}
       </button>
       <ul>
-        {tasks.map((task, index) => (
-          <li key={index}>
-            {task.task}
-            <button className='inputfield' onClick={() => completeTask(task._id)}>Complete</button>
-            <button className='inputfield' onClick={() => deleteTask(task._id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+          {tasks.map((task, index) => (
+            <li key={index}>
+              {editTask.id === task._id ? (
+                <>
+                  <input
+                    type='text'
+                    value={editTask.text}
+                    onChange={handleEditChange}
+                  />
+                  <button
+                    onClick={() => updateTask(editTask.id, editTask.text)}
+                  >
+                    Save
+                  </button>
+                </>
+              ) : (
+                <>
+                  {task.task}
+                  <button
+                    className='inputfield'
+                    onClick={() => completeTask(task)}
+                  >
+                    Complete
+                  </button>
+                  <button
+                    className='inputfield'
+                    onClick={() => deleteTask(task._id)}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    className='inputfield'
+                    onClick={() => editTaskHandler(task._id, task.task)}
+                  >
+                    Edit
+                  </button>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
       {/* Toggle button for navigating to Completed Tasks page */}
       
       {/* Render CompletedTasks component conditionally based on comple state */}
