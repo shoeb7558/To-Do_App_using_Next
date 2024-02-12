@@ -1,22 +1,32 @@
-// pages/completed-tasks.js
-import React from 'react';
-import CompletedTask from '../components/CompletedTask';
+import React, { useState, useEffect } from 'react';
+import CompletedTasks from './completed-tasks'; // Import the CompletedTasks component
 
-const CompletedTasks = ({ completedTasks }) => {
-  console.log('Completed Tasks:', completedTasks); // Log the completedTasks prop
+const completedtask = () => {
+    const [completedTasks, setCompletedTasks] = useState([]);
 
-  if (!completedTasks || completedTasks.length === 0) {
-    return <h1>No completed tasks to show</h1>;
-  }
+    useEffect(() => {
+        const fetchCompletedTasks = async () => {
+            try {
+                const response = await fetch('api/completedtask');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch completed tasks');
+                }
+                const responseData = await response.json();
+                setCompletedTasks(responseData.completedTasks);
+            } catch (error) {
+                console.error('Error fetching completed tasks:', error);
+            }
+        };
 
-  return (
-    <div>
-      <h1>Completed Tasks</h1>
-      {completedTasks.map((task, index) => (
-        <CompletedTask key={index} task={task} />
-      ))}
-    </div>
-  );
+        fetchCompletedTasks();
+    }, []);
+
+    return (
+        <div>
+            <h1>Completed Tasks</h1>
+            <CompletedTasks completedTasks={completedTasks} />
+        </div>
+    );
 };
 
-export default CompletedTasks;
+export default completedtask;
